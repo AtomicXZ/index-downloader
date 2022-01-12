@@ -49,10 +49,17 @@ driver.close()
 # Download files
 for i in ddlLink:
     dir = i[len(indexLink)+1:i.rfind('/')]
+    file = i[len(indexLink)+1:]
     try:
         int(dir[0])
-        dir = dir[3:]
+        dir = unquote(dir[3:])
+        file = unquote(file[3:])
     except ValueError:
         pass
-    dir = unquote(dir)
-    os.system(f"aria2c {i} -d'{dir}'")
+    print(file)
+    while True:
+        os.system(f"aria2c {i} -d'{dir}' --auto-file-renaming=false --save-session log.txt")    
+        if os.path.isfile(file):
+            break
+        elif os.stat("log.txt").st_size == 0:
+            break
