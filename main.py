@@ -1,6 +1,7 @@
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from urllib.parse import quote, unquote
 from selenium import webdriver
@@ -19,16 +20,22 @@ if cred:
     link = f"https://{creds[0]}:{creds[1]}@{link}"
 indexLink = link[:link.replace("https://", "").index("/")+8]
 
-driver = webdriver.Chrome()
+# start chrome driver (headless)
+options = Options()
+options.add_argument('--headless')
+options.add_argument('--disable-gpu')
+driver = webdriver.Chrome(options = options)
 
 def getSoup(link):
     global soup
 
-    driver.get(link)
-    try:
-        myElem = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".list-group-item.list-group-item-action")))
-    except TimeoutException:
-        print("Timeout.")
+    while True:
+        driver.get(link)
+        try:
+            myElem = WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".list-group-item.list-group-item-action")))
+            break
+        except TimeoutException:
+            print("Connection Failed, retrying. Please Wait!")
 
     html = driver.page_source
     soup = BeautifulSoup(html, "lxml")
@@ -58,8 +65,14 @@ for i in ddlLink:
         pass
     print(file)
     while True:
-        os.system(f"aria2c {i} -d'{dir}' --auto-file-renaming=false --save-session log.txt")    
+        os.system(f"aria2c \"{i}\" -d'{dir}' --auto-file-renaming=false --save-session log.txt")    
         if os.path.isfile(file):
             break
         elif os.stat("log.txt").st_size == 0:
             break
+
+# cleanup
+try:
+    os.remove("log.txt")
+except FileNotFoundError:
+    pass
