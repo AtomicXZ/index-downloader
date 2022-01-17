@@ -4,7 +4,7 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from urllib.parse import quote, unquote
-from selenium import webdriver
+from selenium.webdriver import Chrome
 from bs4 import BeautifulSoup
 import os
 
@@ -24,7 +24,7 @@ indexLink = link[:link.replace("https://", "").index("/")+8]
 options = Options()
 options.add_argument('--headless')
 options.add_argument('--disable-gpu')
-driver = webdriver.Chrome(options = options)
+driver = Chrome(options = options)
 
 def getSoup(link):
     global soup
@@ -38,7 +38,7 @@ def getSoup(link):
             print("Connection Failed, retrying. Please Wait!")
 
     html = driver.page_source
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "html.parser")
 
 getSoup(link)
 allFiles = soup.find_all("a", {"class" : "list-group-item-action"}, href = True)
@@ -63,9 +63,8 @@ for i in ddlLink:
         file = unquote(file[3:])
     except ValueError:
         pass
-    print(file)
     while True:
-        os.system(f"aria2c \"{i}\" -d'{dir}' --auto-file-renaming=false --save-session log.txt")    
+        os.system(f"aria2c \"{i}\" -d\"{dir}\" --auto-file-renaming=false --save-session log.txt")    
         if os.path.isfile(file):
             break
         elif os.stat("log.txt").st_size == 0:
