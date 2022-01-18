@@ -5,17 +5,16 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from urllib.parse import quote, unquote
 from selenium.webdriver import Chrome
-from bs4 import BeautifulSoup
 from multiprocessing import Process
+from bs4 import BeautifulSoup
 import os
 
-cred = input("Please enter username and password if required (user,pass):  ")
-creds = cred.split(",")
-
+creds = input("Please enter username and password if required (user,pass):  ")
 link = input("Enter link of index:  ")
 
 # format link for usage with password
-if cred:
+if creds:
+    creds = creds.split(",")
     for i in range(len(creds)):
         creds[i] = quote(creds[i])
     link = link.replace("https://", "")
