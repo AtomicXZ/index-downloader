@@ -9,17 +9,25 @@ from multiprocessing import Process
 from bs4 import BeautifulSoup
 import os
 
-creds = input("Please enter username and password if required (user,pass):  ")
-link = input("Enter link of index:  ")
+
+link = input("Enter index link:  ")
+
+if "https://" in link:
+    prefix = "https://"
+elif "http://" in link:
+    prefix = "http://"
+else:
+    prefix = ""
 
 # format link for usage with password
-if creds:
-    creds = creds.split(",")
-    for i in range(len(creds)):
-        creds[i] = quote(creds[i])
-    link = link.replace("https://", "")
-    link = f"https://{creds[0]}:{creds[1]}@{link}"
-indexLink = link[:link.replace("https://", "").index("/")+8]
+user = input("Enter username, if applicable, else leave empty:  ")
+if user:
+    password = input("Enter password:  ")
+    link = link.replace(prefix, "")
+    link = f"{prefix}{quote(user)}:{quote(password)}@{link}"
+
+indexLink = link[:link.replace(prefix, "").index("/")+len(prefix)]
+
 
 # start chrome driver (headless)
 options = Options()
@@ -29,8 +37,6 @@ driver = Chrome(options=options)
 
 
 def getSoup(link):
-    global soup
-
     while True:
         driver.get(link)
         try:
@@ -41,7 +47,7 @@ def getSoup(link):
             print("Connection Failed, retrying. Please Wait!")
 
     html = driver.page_source
-    soup = BeautifulSoup(html, "html.parser")
+    return BeautifulSoup(html, "html.parser")
 
 
 def download(Sno, Dlist):
@@ -70,7 +76,7 @@ def download(Sno, Dlist):
 
 
 # fetch all links from the base url
-getSoup(link)
+soup = getSoup(link)
 allFiles = soup.find_all("a", {"class": "list-group-item-action"}, href=True)
 
 ddlLink = []
@@ -81,7 +87,7 @@ for i in allFiles:
             f"{indexLink}{i['href'].replace('?a=view', '').replace(' ', '%20')}")
     else:
         # open the link if it's not a file and add it to allFiles var
-        getSoup(
+        soup = getSoup(
             f"{indexLink}{i['href'].replace('?a=view', '').replace(' ', '%20')}")
         allFiles.extend(soup.find_all(
             "a", {"class": "list-group-item-action"}, href=True))
