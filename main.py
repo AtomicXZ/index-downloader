@@ -11,6 +11,12 @@ import os
 
 
 link = input("Enter index link:  ")
+try:
+    simulDownloadNumber = int(
+        input("Enter number of simultaneous downloads (default 4):  "))
+except ValueError:
+    print("Invalid input, continuing with default number (4).")
+    simulDownloadNumber = 4
 
 if "https://" in link:
     prefix = "https://"
@@ -20,12 +26,24 @@ else:
     prefix = ""
 
 # format link for usage with password
-user = input("Enter username, if applicable, else leave empty:  ")
+creds = {"helios": ["helios", "mirror@"], "hash": ["hash", "mirror"],
+         "ghost": ["ghost", "mirror"]}  # credentials for known index links
+
+for i, j in creds.items():
+    if i in link:
+        user = j[0]
+        password = j[1]
+        break
+else:
+    user = input("Enter username, if applicable, else leave empty:  ")
+
 if user:
-    password = input("Enter password:  ")
+    if not password:
+        password = input("Enter password:  ")
     link = link.replace(prefix, "")
     link = f"{prefix}{quote(user)}:{quote(password)}@{link}"
 
+# get index base url
 indexLink = link[:link.replace(prefix, "").index("/")+len(prefix)]
 
 
@@ -95,12 +113,11 @@ for i in allFiles:
 driver.close()
 
 # separate the links list
-k, m = divmod(len(ddlLink), 4)
-ddlList = [ddlLink[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(4)]
+k, m = divmod(len(ddlLink), simulDownloadNumber)
+ddlList = [ddlLink[i*k+min(i, m):(i+1)*k+min(i+1, m)]
+           for i in range(simulDownloadNumber)]
 
 # downloading starts here
-if __name__ == '__main__':
-    Process(target=download, args=(1, ddlList[0],)).start()
-    Process(target=download, args=(2, ddlList[1],)).start()
-    Process(target=download, args=(3, ddlList[2],)).start()
-    Process(target=download, args=(4, ddlList[3],)).start()
+for i in range(simulDownloadNumber):
+    Process(target=download, args=(simulDownloadNumber,
+            ddlList[simulDownloadNumber - 1],)).start()
