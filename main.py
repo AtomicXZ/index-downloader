@@ -5,7 +5,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from urllib.parse import quote, unquote
 from selenium.webdriver import Chrome
-from multiprocessing import Process
+from multiprocessing import Pool
 from bs4 import BeautifulSoup
 import os
 
@@ -117,7 +117,9 @@ k, m = divmod(len(ddlLink), simulDownloadNumber)
 ddlList = [ddlLink[i*k+min(i, m):(i+1)*k+min(i+1, m)]
            for i in range(simulDownloadNumber)]
 
-# downloading starts here
+simulDownloadList = []
 for i in range(simulDownloadNumber):
-    Process(target=download, args=(simulDownloadNumber,
-            ddlList[simulDownloadNumber - 1],)).start()
+    simulDownloadList.append((i + 1, ddlList[i]))
+
+# downloading starts here
+dl = Pool(simulDownloadNumber).starmap(download, simulDownloadList)
