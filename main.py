@@ -81,7 +81,7 @@ def download(Sno, Dlist):
         while True:
             os.system(
                 f"aria2c \"{i}\" -d\"{dir}\" --auto-file-renaming=false --save-session log-{Sno}.txt")
-            if os.path.isfile(file):
+            if os.path.isfile(file) and not os.path.isfile(f"{file}.aria2"):
                 break
             elif os.stat(f"log-{Sno}.txt").st_size == 0:
                 break
