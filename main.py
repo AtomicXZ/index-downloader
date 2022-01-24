@@ -82,16 +82,16 @@ def download(Sno, Dlist):
         except ValueError:
             pass
         while True:
-            os.system(
+            system(
                 f"aria2c \"{i}\" -d\"{dir}\" --auto-file-renaming=false --save-session log-{Sno}.txt")
-            if os.path.isfile(file) and not os.path.isfile(f"{file}.aria2"):
+            if path.isfile(file) and not path.isfile(f"{file}.aria2"):
                 break
-            elif os.stat(f"log-{Sno}.txt").st_size == 0:
+            elif stat(f"log-{Sno}.txt").st_size == 0:
                 break
 
     # delete the generated log file
     try:
-        os.remove(f"log-{Sno}.txt")
+        remove(f"log-{Sno}.txt")
     except FileNotFoundError:
         pass
 
