@@ -7,6 +7,7 @@ from urllib.parse import quote, unquote
 from selenium.webdriver import Chrome
 from multiprocessing import Pool
 from bs4 import BeautifulSoup
+from time import sleep
 import os
 
 
@@ -15,7 +16,7 @@ try:
     simulDownloadNumber = int(
         input("Enter number of simultaneous downloads (default 4):  "))
 except ValueError:
-    print("Invalid input, continuing with default number (4).")
+    print("Continuing with default (4).")
     simulDownloadNumber = 4
 
 if "https://" in link:
@@ -57,8 +58,21 @@ driver = Chrome(options=options)
 def getSoup(link):
     while True:
         driver.get(link)
+
+        last_height = driver.execute_script(
+            "return document.body.scrollHeight")
+        while True:
+            driver.execute_script(
+                "window.scrollTo(0, document.body.scrollHeight);")
+            sleep(1)
+            new_height = driver.execute_script(
+                "return document.body.scrollHeight")
+            if new_height == last_height:
+                break
+            last_height = new_height
+
         try:
-            myElem = WebDriverWait(driver, 3).until(EC.presence_of_element_located(
+            myElem = WebDriverWait(driver, 1).until(EC.presence_of_element_located(
                 (By.CSS_SELECTOR, ".list-group-item.list-group-item-action")))
             break
         except TimeoutException:
