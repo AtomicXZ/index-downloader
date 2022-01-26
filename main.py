@@ -71,16 +71,24 @@ def getSoup(link):
     return BeautifulSoup(html, "html.parser")
 
 
+# get file name and path
+def getPath(i):
+    dir = i[len(indexLink)+1:i.rfind('/')]
+    file = i[len(indexLink)+1:]
+    try:
+        int(dir[0])
+        dir = unquote(dir[3:])
+        file = unquote(file[3:])
+    except ValueError:
+        dir = unquote(dir)
+        file = unquote(file)
+
+    return [dir, file]
+
+
 def download(Sno, Dlist):
     for i in Dlist:
-        dir = i[len(indexLink)+1:i.rfind('/')]
-        file = i[len(indexLink)+1:]
-        try:
-            int(dir[0])
-            dir = unquote(dir[3:])
-            file = unquote(file[3:])
-        except ValueError:
-            pass
+        dir, file = getPath(i)[0], getPath(i)[1]
         while True:
             system(
                 f"aria2c \"{i}\" -d\"{dir}\" --auto-file-renaming=false --save-session log-{Sno}.txt")
