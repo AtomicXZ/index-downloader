@@ -73,15 +73,24 @@ def getSoup(link):
 
 # get file name and path
 def getPath(i):
-    dir = i[len(indexLink)+1:i.rfind('/')]
-    file = i[len(indexLink)+1:]
+    if indexLink in i:
+        dir = i[len(indexLink)+1:i.rfind('/')]
+        file = i[len(indexLink)+1:]
+    else:
+        dir = i[:i.rfind('/')]
+        file = i
     try:
         int(dir[0])
         dir = unquote(dir[3:])
         file = unquote(file[3:])
     except ValueError:
-        dir = unquote(dir)
-        file = unquote(file)
+        try:
+            int(dir[1])
+            dir = unquote(dir[4:])
+            file = unquote(file[4:])
+        except ValueError:
+            dir = unquote(dir)
+            file = unquote(file)
 
     return [dir, file]
 
@@ -110,10 +119,17 @@ allFiles = soup.find_all("a", {"class": "list-group-item-action"}, href=True)
 
 ddlLink = []
 for i in allFiles:
-    if not i["href"].replace('?a=view', '')[-1] == "/":
-        # add link to list after formatting if it's a file
-        ddlLink.append(
-            f"{indexLink}{i['href'].replace('?a=view', '').replace(' ', '%20')}")
+    remView = i["href"].replace('?a=view', '')
+    # check if link is a file or folder
+    if not remView[-1] == "/":
+        if path.isfile(getPath(remView)[1]) and path.isfile(f"{getPath(remView)[1]}.aria2"):
+            # check if file already exists and only add if *.aria2 also exists
+            ddlLink.append(
+                f"{indexLink}{remView.replace(' ', '%20')}")
+        elif not path.isfile(getPath(remView)[1]):
+            # if file doesn't exist then just add it
+            ddlLink.append(
+                f"{indexLink}{remView.replace(' ', '%20')}")
     else:
         # open the link if it's not a file and add it to allFiles var
         soup = getSoup(
