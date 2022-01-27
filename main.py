@@ -16,13 +16,12 @@ else:
     prefix = ""
 
 # format link for usage with password
-creds = {"helios": ["helios", "mirror@"], "hash": ["hash", "mirror"],
-         "ghost": ["ghost", "mirror"]}  # credentials for known index links
+creds = load(open(f"{path.dirname(__file__)}/creds.json"))
 
-for i, j in creds.items():
+for i in creds:
     if i in link:
-        user = j[0]
-        password = j[1]
+        user = creds[i]["user"]
+        password = creds[i]["password"]
         break
 else:
     user = input("Enter username, if applicable, else leave empty:  ")

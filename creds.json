@@ -1,0 +1,12 @@
+{
+    "helios": {
+        "user": "helios",
+        "password": "mirror@",
+        "ddos": true
+    },
+    "hash": {
+        "user": "hash",
+        "password": "mirror",
+        "ddos": false
+    }
+}
