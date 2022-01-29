@@ -122,14 +122,16 @@ def download(Sno, Dlist):
 
 
 # fetch all links from the base url
-allFiles = ""
 ddlLink = []
 
 for i in link:
     if i[-1] == "/":
         soup = getSoup(i)
-        allFiles.extend(soup.find_all(
-            "a", {"class": "list-group-item-action"}, href=True))
+        if link.index(i) == 0:
+            allFiles = soup.find_all("a", {"class": "list-group-item-action"}, href=True)
+        else:
+            allFiles.extend(soup.find_all(
+                "a", {"class": "list-group-item-action"}, href=True))
     else:
         ddlLink.append(i)
 
