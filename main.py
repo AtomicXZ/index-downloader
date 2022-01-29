@@ -1,6 +1,10 @@
 from __init__ import *
 
 link = input("Enter index link:  ")
+link = list(filter(None, link.strip().split(",")))
+for i in link:
+    link[link.index(i)] = i.strip()
+
 try:
     simulDownloadNumber = int(
         input("Enter number of simultaneous downloads (default 4):  "))
@@ -8,9 +12,9 @@ except ValueError:
     print("Continuing with default (4).")
     simulDownloadNumber = 4
 
-if "https://" in link:
+if "https://" in link[0]:
     prefix = "https://"
-elif "http://" in link:
+elif "http://" in link[0]:
     prefix = "http://"
 else:
     prefix = ""
@@ -19,7 +23,7 @@ else:
 creds = load(open(f"{path.dirname(__file__)}/creds.json"))
 
 for i in creds:
-    if i in link:
+    if i in link[0]:
         user = creds[i]["user"]
         password = creds[i]["password"]
         break
@@ -29,11 +33,12 @@ else:
 if user:
     if not password:
         password = input("Enter password:  ")
-    link = link.replace(prefix, "")
-    link = f"{prefix}{quote(user)}:{quote(password)}@{link}"
+    for i in link:
+        nlink = f"{prefix}{quote(user)}:{quote(password)}@{i.replace(prefix, '')}"
+        link[link.index(i)] = nlink
 
 # get index base url
-indexLink = link[:link.replace(prefix, "").index("/")+len(prefix)]
+indexLink = link[0][:link[0].replace(prefix, "").index("/")+len(prefix)]
 
 
 # start chrome driver (headless)
@@ -98,8 +103,12 @@ def download(Sno, Dlist):
     for i in Dlist:
         dir, file = getPath(i)[0], getPath(i)[1]
         while True:
-            system(
-                f"aria2c \"{i}\" -d\"{dir}\" --auto-file-renaming=false --save-session log-{Sno}.txt")
+            if dir:
+                system(
+                    f"aria2c \"{i}\" -d\"{dir}\" --auto-file-renaming=false --save-session log-{Sno}.txt")
+            else:
+                system(
+                    f"aria2c \"{i}\" --auto-file-renaming=false --save-session log-{Sno}.txt")
             if path.isfile(file) and not path.isfile(f"{file}.aria2"):
                 break
             elif stat(f"log-{Sno}.txt").st_size == 0:
@@ -113,10 +122,17 @@ def download(Sno, Dlist):
 
 
 # fetch all links from the base url
-soup = getSoup(link)
-allFiles = soup.find_all("a", {"class": "list-group-item-action"}, href=True)
-
+allFiles = ""
 ddlLink = []
+
+for i in link:
+    if i[-1] == "/":
+        soup = getSoup(i)
+        allFiles.extend(soup.find_all(
+            "a", {"class": "list-group-item-action"}, href=True))
+    else:
+        ddlLink.append(i)
+
 for i in allFiles:
     remView = i["href"].replace('?a=view', '')
     # check if link is a file or folder
