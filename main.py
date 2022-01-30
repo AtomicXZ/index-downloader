@@ -34,8 +34,10 @@ if user:
     if not password:
         password = input("Enter password:  ")
     for i in link:
-        nlink = f"{prefix}{quote(user)}:{quote(password)}@{i.replace(prefix, '')}"
-        link[link.index(i)] = nlink
+        credentials = f"{quote(user)}:{quote(password)}"
+        if not credentials in i:
+            nlink = f"{prefix}{credentials}@{i.replace(prefix, '')}"
+            link[link.index(i)] = nlink
 
 # get index base url
 indexLink = link[0][:link[0].replace(prefix, "").index("/")+len(prefix)]
