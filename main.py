@@ -123,6 +123,7 @@ def download(Sno, Dlist):
 
 # fetch all links from the base url
 ddlLink = []
+allFiles = "" # set empty var to avoid iteration error in for loop
 
 for i in link:
     if i[-1] == "/":
