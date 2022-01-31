@@ -1,6 +1,16 @@
 from __init__ import *
 
-link = input("Enter index link:  ")
+parser = argparse.ArgumentParser(description="Simple script to download folders/files from cloudflare gdrive index links.")
+parser.add_argument("-l", "--link", help="Enter link. Put multiple links with no space or by enclosing them in inverted commas (\"\")", required=False)
+parser.add_argument("-u", "--user", help="Enter username if required.", required=False)
+parser.add_argument("-p", "--password", help="Enter password if username is entered.", required=False)
+args = vars(parser.parse_args())
+
+if not args["link"]:
+    link = input("Enter index link:  ")
+else:
+    link = args["link"]
+
 link = list(filter(None, link.strip().split(",")))
 for i in link:
     link[link.index(i)] = i.strip()
@@ -23,7 +33,11 @@ else:
 creds = load(open(f"{path.dirname(__file__)}/creds.json"))
 
 for i in creds:
-    if i in link[0]:
+    if args["user"] and args["password"]:
+        user = args["user"]
+        password = args["password"]
+        break
+    elif i in link[0]:
         user = creds[i]["user"]
         password = creds[i]["password"]
         break
