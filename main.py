@@ -13,9 +13,9 @@ from time import sleep
 from json import load
 
 parser = ArgumentParser(description="Simple script to download folders/files from cloudflare gdrive index links.")
-parser.add_argument("-l", "--link", help="Enter link. Put multiple links with no space or by enclosing them in inverted commas (\"\")", required=False)
-parser.add_argument("-u", "--user", help="Enter username if required.", required=False)
-parser.add_argument("-p", "--password", help="Enter password if username is entered.", required=False)
+parser.add_argument("-l", "--link", help="Link. Put multiple links with no space or by enclosing them in inverted commas (\"\").")
+parser.add_argument("-u", "--user", help="Username for auth, if required.")
+parser.add_argument("-p", "--password", help="Password for auth, if username is entered.")
 args = vars(parser.parse_args())
 
 if not args["link"]:
