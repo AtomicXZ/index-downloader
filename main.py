@@ -12,10 +12,15 @@ from bs4 import BeautifulSoup
 from time import sleep
 from json import load
 
-parser = ArgumentParser(description="Simple script to download folders/files from cloudflare gdrive index links.")
-parser.add_argument("-l", "--link", help="Link. Put multiple links with no space or by enclosing them in inverted commas (\"\").")
+parser = ArgumentParser(
+    description="Simple script to download folders/files from cloudflare gdrive index links.")
+parser.add_argument(
+    "-l", "--link", help="Link. Put multiple links with no space or by enclosing them in inverted commas (\"\").")
 parser.add_argument("-u", "--user", help="Username for auth, if required.")
-parser.add_argument("-p", "--password", help="Password for auth, if username is entered.")
+parser.add_argument("-p", "--password",
+                    help="Password for auth, if username is entered.")
+parser.add_argument("-s", "--sessions",
+                    help="Number of simultaneous downloades.")
 args = vars(parser.parse_args())
 
 if not args["link"]:
@@ -28,11 +33,9 @@ for i in link:
     link[link.index(i)] = i.strip()
 
 try:
-    simulDownloadNumber = int(
-        input("Enter number of simultaneous downloads (default 4):  "))
+    MULTIPROCESSING_SESSIONS = int(args["sessions"])
 except ValueError:
-    print("Continuing with default (4).")
-    simulDownloadNumber = 4
+    MULTIPROCESSING_SESSIONS = 2
 
 if "https://" in link[0]:
     prefix = "https://"
@@ -151,13 +154,14 @@ def download(Sno, Dlist):
 
 # fetch all links from the base url
 ddlLink = []
-allFiles = "" # set empty var to avoid iteration error in for loop
+allFiles = ""  # set empty var to avoid iteration error in for loop
 
 for i in link:
     if i[-1] == "/":
         soup = getSoup(i)
         if link.index(i) == 0:
-            allFiles = soup.find_all("a", {"class": "list-group-item-action"}, href=True)
+            allFiles = soup.find_all(
+                "a", {"class": "list-group-item-action"}, href=True)
         else:
             allFiles.extend(soup.find_all(
                 "a", {"class": "list-group-item-action"}, href=True))
@@ -186,13 +190,13 @@ for i in allFiles:
 driver.close()
 
 # separate the links list
-k, m = divmod(len(ddlLink), simulDownloadNumber)
+k, m = divmod(len(ddlLink), MULTIPROCESSING_SESSIONS)
 ddlList = [ddlLink[i*k+min(i, m):(i+1)*k+min(i+1, m)]
-           for i in range(simulDownloadNumber)]
+           for i in range(MULTIPROCESSING_SESSIONS)]
 
 simulDownloadList = []
-for i in range(simulDownloadNumber):
+for i in range(MULTIPROCESSING_SESSIONS):
     simulDownloadList.append((i + 1, ddlList[i]))
 
 # downloading starts here
-dl = Pool(simulDownloadNumber).starmap(download, simulDownloadList)
+dl = Pool(MULTIPROCESSING_SESSIONS).starmap(download, simulDownloadList)
