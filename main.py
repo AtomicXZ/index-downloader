@@ -1,6 +1,18 @@
-from __init__ import *
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from os import path, remove, stat, system
+from urllib.parse import quote, unquote
+from selenium.webdriver import Chrome
+from argparse import ArgumentParser
+from multiprocessing import Pool
+from bs4 import BeautifulSoup
+from time import sleep
+from json import load
 
-parser = argparse.ArgumentParser(description="Simple script to download folders/files from cloudflare gdrive index links.")
+parser = ArgumentParser(description="Simple script to download folders/files from cloudflare gdrive index links.")
 parser.add_argument("-l", "--link", help="Enter link. Put multiple links with no space or by enclosing them in inverted commas (\"\")", required=False)
 parser.add_argument("-u", "--user", help="Enter username if required.", required=False)
 parser.add_argument("-p", "--password", help="Enter password if username is entered.", required=False)
