@@ -69,7 +69,7 @@ if user:
             link[link.index(i)] = nlink
 
 # get index base url
-indexLink = link[0][:link[0].replace(prefix, "").index("/")+len(prefix)]
+index_link = link[0][:link[0].replace(prefix, "").index("/")+len(prefix)]
 
 
 # start chrome driver (headless)
@@ -79,7 +79,7 @@ options.add_argument('--disable-gpu')
 driver = Chrome(options=options)
 
 
-def getSoup(link):
+def get_soup(link):
     while True:
         driver.get(link)
 
@@ -96,7 +96,7 @@ def getSoup(link):
             last_height = new_height
 
         try:
-            myElem = WebDriverWait(driver, 1).until(EC.presence_of_element_located(
+            my_elem = WebDriverWait(driver, 1).until(EC.presence_of_element_located(
                 (By.CSS_SELECTOR, ".list-group-item.list-group-item-action")))
             break
         except TimeoutException:
@@ -107,10 +107,10 @@ def getSoup(link):
 
 
 # get file name and path
-def getPath(i):
-    if indexLink in i:
-        dir = i[len(indexLink)+1:i.rfind('/')]
-        file = i[len(indexLink)+1:]
+def get_path(i):
+    if index_link in i:
+        dir = i[len(index_link)+1:i.rfind('/')]
+        file = i[len(index_link)+1:]
     else:
         dir = i[:i.rfind('/')]
         file = i
@@ -130,9 +130,9 @@ def getPath(i):
     return [dir, file]
 
 
-def download(Sno, Dlist):
-    for i in Dlist:
-        dir, file = getPath(i)[0], getPath(i)[1]
+def download(Sno, data_list):
+    for i in data_list:
+        dir, file = get_path(i)[0], get_path(i)[1]
         while True:
             if dir:
                 system(
@@ -153,50 +153,50 @@ def download(Sno, Dlist):
 
 
 # fetch all links from the base url
-ddlLink = []
-allFiles = ""  # set empty var to avoid iteration error in for loop
+dl_link = []
+all_files = ""  # set empty var to avoid iteration error in for loop
 
 for i in link:
     if i[-1] == "/":
-        soup = getSoup(i)
+        soup = get_soup(i)
         if link.index(i) == 0:
-            allFiles = soup.find_all(
+            all_files = soup.find_all(
                 "a", {"class": "list-group-item-action"}, href=True)
         else:
-            allFiles.extend(soup.find_all(
+            all_files.extend(soup.find_all(
                 "a", {"class": "list-group-item-action"}, href=True))
     else:
-        ddlLink.append(i)
+        dl_link.append(i)
 
-for i in allFiles:
-    remView = i["href"].replace('?a=view', '')
+for i in all_files:
+    rem_view = i["href"].replace('?a=view', '')
     # check if link is a file or folder
-    if not remView[-1] == "/":
-        if path.isfile(getPath(remView)[1]) and path.isfile(f"{getPath(remView)[1]}.aria2"):
+    if not rem_view[-1] == "/":
+        if path.isfile(get_path(rem_view)[1]) and path.isfile(f"{get_path(rem_view)[1]}.aria2"):
             # check if file already exists and only add if *.aria2 also exists
-            ddlLink.append(
-                f"{indexLink}{remView.replace(' ', '%20')}")
-        elif not path.isfile(getPath(remView)[1]):
+            dl_link.append(
+                f"{index_link}{rem_view.replace(' ', '%20')}")
+        elif not path.isfile(get_path(rem_view)[1]):
             # if file doesn't exist then just add it
-            ddlLink.append(
-                f"{indexLink}{remView.replace(' ', '%20')}")
+            dl_link.append(
+                f"{index_link}{rem_view.replace(' ', '%20')}")
     else:
-        # open the link if it's not a file and add it to allFiles var
-        soup = getSoup(
-            f"{indexLink}{i['href'].replace('?a=view', '').replace(' ', '%20')}")
-        allFiles.extend(soup.find_all(
+        # open the link if it's not a file and add it to all_files var
+        soup = get_soup(
+            f"{index_link}{i['href'].replace('?a=view', '').replace(' ', '%20')}")
+        all_files.extend(soup.find_all(
             "a", {"class": "list-group-item-action"}, href=True))
 
 driver.close()
 
 # separate the links list
-k, m = divmod(len(ddlLink), MULTIPROCESSING_SESSIONS)
-ddlList = [ddlLink[i*k+min(i, m):(i+1)*k+min(i+1, m)]
+k, m = divmod(len(dl_link), MULTIPROCESSING_SESSIONS)
+dl_list = [dl_link[i*k+min(i, m):(i+1)*k+min(i+1, m)]
            for i in range(MULTIPROCESSING_SESSIONS)]
 
-simulDownloadList = []
+multiprocessing_sessions_dl_list = []
 for i in range(MULTIPROCESSING_SESSIONS):
-    simulDownloadList.append((i + 1, ddlList[i]))
+    multiprocessing_sessions_dl_list.append((i + 1, dl_list[i]))
 
 # downloading starts here
-dl = Pool(MULTIPROCESSING_SESSIONS).starmap(download, simulDownloadList)
+dl = Pool(MULTIPROCESSING_SESSIONS).starmap(download, multiprocessing_sessions_dl_list)
