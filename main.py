@@ -33,7 +33,10 @@ for i in link:
     link[link.index(i)] = i.strip()
 
 try:
-    MULTIPROCESSING_SESSIONS = int(args["sessions"])
+    if not args["sessions"]:
+        raise ValueError
+    else:
+        MULTIPROCESSING_SESSIONS = int(args["sessions"])
 except ValueError:
     MULTIPROCESSING_SESSIONS = 2
 
