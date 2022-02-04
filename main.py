@@ -8,6 +8,7 @@ from urllib.parse import quote, unquote
 from selenium.webdriver import Chrome
 from argparse import ArgumentParser
 from multiprocessing import Pool
+from questionary import checkbox, select
 from bs4 import BeautifulSoup
 from time import sleep
 from json import load
@@ -192,6 +193,29 @@ for i in all_files:
 
 driver.close()
 
+# files to download
+dl_options = ["All", "Select files to download"]
+op = select(
+    "Which files do you want to download?",
+    choices=dl_options
+).ask()
+
+if op == dl_options[1]:
+    selected_files = {}
+    for i in dl_link:
+        selected_files[i] = get_path(i)[1][get_path(i)[1].find("/") + 1:]
+
+    alert_msg = "Warning! Large list!\n" if len(dl_link) > 25 else ""
+    selected_op = checkbox(
+        f"{alert_msg}Select files to download",
+        choices=list(selected_files.values())
+    ).ask()
+
+    dl_link = []
+    for i in selected_op:
+        dl_link.append(list(selected_files.keys())[
+                         list(selected_files.values()).index(i)])
+
 # separate the links list
 k, m = divmod(len(dl_link), MULTIPROCESSING_SESSIONS)
 dl_list = [dl_link[i*k+min(i, m):(i+1)*k+min(i+1, m)]
@@ -202,4 +226,5 @@ for i in range(MULTIPROCESSING_SESSIONS):
     multiprocessing_sessions_dl_list.append((i + 1, dl_list[i]))
 
 # downloading starts here
-dl = Pool(MULTIPROCESSING_SESSIONS).starmap(download, multiprocessing_sessions_dl_list)
+dl = Pool(MULTIPROCESSING_SESSIONS).starmap(
+    download, multiprocessing_sessions_dl_list)
