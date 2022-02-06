@@ -7,8 +7,11 @@ name = input("Enter keyword from index link:  ")
 user = input("Enter username for the index:  ")
 password = input("Enter password for the index:  ")
 
+try:
+    data = json.load(open(path))
+except FileNotFoundError:
+    data = {}
 
-data = json.load(open(path))
 data[name.lower()] = {"user": user, "password": password}
 
 with open(path, "w", encoding="utf-8") as f:

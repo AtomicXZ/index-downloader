@@ -49,7 +49,10 @@ else:
     prefix = ""
 
 # format link for usage with password
-creds = load(open(f"{path.dirname(__file__)}/creds.json"))
+try:
+    creds = load(open(f"{path.dirname(__file__)}/creds.json"))
+except FileNotFoundError:
+    pass
 
 for i in creds:
     if args["user"] and args["password"]:
