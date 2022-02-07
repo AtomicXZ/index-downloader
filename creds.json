@@ -6,5 +6,9 @@
     "hash": {
         "user": "hash",
         "password": "mirror"
+    },
+    "ghostmirror": {
+        "user": "ghost",
+        "password": "mirror"
     }
 }
