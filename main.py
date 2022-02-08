@@ -79,6 +79,13 @@ if user:
 index_link = link[0][:link[0].replace(prefix, "").index("/")+len(prefix)]
 
 
+# start chrome driver (headless)
+options = Options()
+options.add_argument('--headless')
+options.add_argument('--disable-gpu')
+driver = Chrome(options=options)
+
+
 def get_soup(link):
     while True:
         driver.get(link)
@@ -158,11 +165,6 @@ all_files = ""  # set empty var to avoid iteration error in for loop
 
 for i in link:
     if i[-1] == "/":
-        options = Options()
-        options.add_argument('--headless')
-        options.add_argument('--disable-gpu')
-        driver = Chrome(options=options)
-
         soup = get_soup(i)
         if link.index(i) == 0:
             all_files = soup.find_all(
