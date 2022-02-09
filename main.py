@@ -198,7 +198,7 @@ driver.close()
 
 # files to download
 dl_options = [
-    "All", f"Select files to download {'[Warning! Large list!]' if len(dl_link) > 25 else ''}", "Exit"]
+    "All", f"Select files to download{' [Warning! Large list!]' if len(dl_link) > 25 else ''}", "Select folders to download", "Exit"]
 op = select(
     "Which files do you want to download?",
     choices=dl_options
@@ -206,23 +206,47 @@ op = select(
 
 if op == dl_options[0]:
     pass
+
 elif op == dl_options[1]:
     selected_files = {}
     for i in dl_link:
         selected_files[i] = get_path(i)[1][get_path(i)[1].find("/") + 1:]
-
     selected_op = checkbox(
         "Select files to download",
         choices=list(selected_files.values())
     ).ask()
+    if selected_op is None:
+        raise SystemExit()
 
     dl_link = []
     for i in selected_op:
         dl_link.append(list(selected_files.keys())[
             list(selected_files.values()).index(i)])
+
+elif op == dl_options[2]:
+    selected_folders = {}
+    for i in dl_link:
+        folder_name = get_path(i)[0][get_path(i)[0].find("/") + 1:]
+
+        if folder_name not in list(selected_folders.keys()):
+            selected_folders[folder_name] = [i]
+        else:
+            selected_folders[folder_name].append(i)
+    selected_op = checkbox(
+        "Select folders to download",
+        choices=list(selected_folders.keys())
+    ).ask()
+    if selected_op is None:
+        raise SystemExit()
+
+    dl_link = []
+    for i in selected_op:
+        for j in selected_folders[i]:
+            dl_link.append(j)
+
 else:
-    msg = "Invalid response!" if not op == dl_options[2] else ""
-    raise SystemExit(f"Exiting. {msg}")
+    msg = " Invalid response!" if not op == dl_options[3] else ""
+    raise SystemExit(f"Exiting.{msg}")
 
 # separate the links list
 k, m = divmod(len(dl_link), MULTIPROCESSING_SESSIONS)
