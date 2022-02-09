@@ -197,27 +197,32 @@ for i in all_files:
 driver.close()
 
 # files to download
-dl_options = ["All", "Select files to download"]
+dl_options = [
+    "All", f"Select files to download {'[Warning! Large list!]' if len(dl_link) > 25 else ''}", "Exit"]
 op = select(
     "Which files do you want to download?",
     choices=dl_options
 ).ask()
 
-if op == dl_options[1]:
+if op == dl_options[0]:
+    pass
+elif op == dl_options[1]:
     selected_files = {}
     for i in dl_link:
         selected_files[i] = get_path(i)[1][get_path(i)[1].find("/") + 1:]
 
-    alert_msg = "Warning! Large list!\n" if len(dl_link) > 25 else ""
     selected_op = checkbox(
-        f"{alert_msg}Select files to download",
+        "Select files to download",
         choices=list(selected_files.values())
     ).ask()
 
     dl_link = []
     for i in selected_op:
         dl_link.append(list(selected_files.keys())[
-                         list(selected_files.values()).index(i)])
+            list(selected_files.values()).index(i)])
+else:
+    msg = "Invalid response!" if not op == dl_options[2] else ""
+    raise SystemExit(f"Exiting. {msg}")
 
 # separate the links list
 k, m = divmod(len(dl_link), MULTIPROCESSING_SESSIONS)
