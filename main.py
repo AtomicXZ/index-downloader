@@ -95,7 +95,7 @@ def get_soup(link):
         while True:
             driver.execute_script(
                 "window.scrollTo(0, document.body.scrollHeight);")
-            sleep(1)
+            sleep(2)
             new_height = driver.execute_script(
                 "return document.body.scrollHeight")
             if new_height == last_height:
