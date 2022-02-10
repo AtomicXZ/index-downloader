@@ -226,7 +226,11 @@ elif op == dl_options[1]:
 elif op == dl_options[2]:
     selected_folders = {}
     for i in dl_link:
-        folder_name = get_path(i)[0][get_path(i)[0].find("/") + 1:]
+        folder_name = get_path(i)[0]
+        if folder_name.count("/") == 0:
+            folder_name = "Root"
+        else:
+            folder_name = folder_name[folder_name.find("/") + 1:]
 
         if folder_name not in list(selected_folders.keys()):
             selected_folders[folder_name] = [i]
